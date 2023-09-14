@@ -1,55 +1,66 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "variables": {
-    "webSiteName": "[parameters('appName')]"
-  },
   "resources": [
     {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2018-11-01",
-      "name": "[parameters('appName')]",
-      "location": "[parameters('location')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "myVNet",
+      "location": "East US",
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        }
       }
     },
     {
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2018-02-01",
-      "name": "[parameters('appServicePlanName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "S1",
-        "tier": "Standard"
-      },
-      "properties": {}
-    }
-  ],
-  "parameters": {
-    "appName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the Azure Web App"
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "myVNet",
+      "location": "West US",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.1.0.0/16"
+          ]
+        }
       }
     },
-    "location": {
-      "type": "string",
-      "metadata": {
-        "description": "Azure Region for deployment"
-      }
-    },
-    "appServicePlanName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the App Service Plan"
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "myVM",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'myVNetEast')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_D2s_v3"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage"
+          },
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          }
+        },
+        "osProfile": {
+          "computerName": "myVM",
+          "adminUsername": "adminuser",
+          "adminPassword": "your-password"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', 'myNIC')]"
+            }
+          ]
+        }
       }
     }
-  },
-  "outputs": {
-    "webAppURL": {
-      "type": "string",
-      "value": "[reference(variables('webSiteName')).defaultHostName]"
-    }
-  }
+  ]
 }
