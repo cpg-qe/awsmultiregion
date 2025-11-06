@@ -16,6 +16,13 @@
         "description": "Name of the Load Balancer"
       }
     },
+    "deploymentID": {
+      "type": "string",
+      "defaultValue": "deploymentID",
+      "metadata": {
+        "description": "Name of the Load Balancer"
+      }
+    },
     "publicIPName": {
       "type": "string",
       "defaultValue": "myPublicIP",
@@ -98,6 +105,9 @@
           }
         ]
       }
+    }
+    "tags": {
+        "deploymentID": "[parameters('deploymentID')]"
     }
   ],
   "outputs": {
