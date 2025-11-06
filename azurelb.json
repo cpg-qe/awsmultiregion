@@ -38,7 +38,7 @@
       "name": "[parameters('publicIPName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Basic"
+        "name": "Standard"
       },
       "tags": {
         "deploymentID": "[parameters('deploymentID')]"
@@ -53,7 +53,7 @@
       "name": "[parameters('lbName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Basic"
+        "name": "Standard"
       },
       "tags": {
         "deploymentID": "[parameters('deploymentID')]"
