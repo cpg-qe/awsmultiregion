@@ -9,57 +9,43 @@
         "description": "Azure region for resources"
       }
     },
-    "lbName": {
-      "type": "string",
-      "defaultValue": "myLoadBalancer",
-      "metadata": {
-        "description": "Name of the Load Balancer"
-      }
-    },
     "deploymentID": {
       "type": "string",
-      "defaultValue": "deploymentID",
       "metadata": {
-        "description": "Deployment ID tag for resources"
-      }
-    },
-    "publicIPName": {
-      "type": "string",
-      "defaultValue": "myPublicIP",
-      "metadata": {
-        "description": "Public IP name for Load Balancer"
+        "description": "Unique deployment ID used to create unique resource names"
       }
     }
+  },
+  "variables": {
+    "publicIPName": "[concat('publicIP-', parameters('deploymentID'))]",
+    "lbName": "[concat('lb-', parameters('deploymentID'))]"
   },
   "resources": [
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2022-09-01",
-      "name": "[parameters('publicIPName')]",
+      "name": "[variables('publicIPName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard"
       },
-      "tags": {
-        "deploymentID": "[parameters('deploymentID')]"
-      },
       "properties": {
         "publicIPAllocationMethod": "Static"
+      },
+      "tags": {
+        "deploymentID": "[parameters('deploymentID')]"
       }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
       "apiVersion": "2022-09-01",
-      "name": "[parameters('lbName')]",
+      "name": "[variables('lbName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard"
       },
-      "tags": {
-        "deploymentID": "[parameters('deploymentID')]"
-      },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPName'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
       ],
       "properties": {
         "frontendIPConfigurations": [
@@ -67,7 +53,7 @@
             "name": "LoadBalancerFrontEnd",
             "properties": {
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
               }
             }
           }
@@ -82,13 +68,13 @@
             "name": "HTTPRule",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/frontendIPConfigurations/LoadBalancerFrontEnd')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/frontendIPConfigurations/LoadBalancerFrontEnd')]"
               },
               "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/BackEndPool')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/backendAddressPools/BackEndPool')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/probes/HealthProbe')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('lbName')), '/probes/HealthProbe')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -110,13 +96,20 @@
             }
           }
         ]
+      },
+      "tags": {
+        "deploymentID": "[parameters('deploymentID')]"
       }
     }
   ],
   "outputs": {
-    "loadBalancerPublicIP": {
+    "loadBalancerName": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPName'))).ipAddress]"
+      "value": "[variables('lbName')]"
+    },
+    "publicIPAddress": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))).ipAddress]"
     }
   }
 }
