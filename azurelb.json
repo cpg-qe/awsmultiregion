@@ -20,7 +20,7 @@
       "type": "string",
       "defaultValue": "deploymentID",
       "metadata": {
-        "description": "Name of the Load Balancer"
+        "description": "Deployment ID tag for resources"
       }
     },
     "publicIPName": {
@@ -40,6 +40,9 @@
       "sku": {
         "name": "Basic"
       },
+      "tags": {
+        "deploymentID": "[parameters('deploymentID')]"
+      },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       }
@@ -51,6 +54,9 @@
       "location": "[parameters('location')]",
       "sku": {
         "name": "Basic"
+      },
+      "tags": {
+        "deploymentID": "[parameters('deploymentID')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPName'))]"
@@ -105,9 +111,6 @@
           }
         ]
       }
-    }
-    "tags": {
-        "deploymentID": "[parameters('deploymentID')]"
     }
   ],
   "outputs": {
